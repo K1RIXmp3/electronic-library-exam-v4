@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход · Электронная библиотека{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-4">Вход</h1>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="login" class="form-label">Логин</label>
+                        <input type="text" class="form-control" id="login" name="login" required autofocus value="{{ request.form.get('login', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">Запомнить меня</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                </form>
+                <hr>
+                <div class="small text-muted">
+                    Тестовые аккаунты:<br>
+                    Ник/Пароль: admin/admin moderator/moderator user/user
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

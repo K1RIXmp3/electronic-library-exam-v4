@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная · Электронная библиотека{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <section class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h2 class="h5 mb-0">Популярные книги</h2>
+            </div>
+            <div class="card-body">
+                {% if popular_books %}
+                    <div class="list-group list-group-flush">
+                        {% for book, views_count in popular_books %}
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="{{ url_for('view_book', book_id=book.id) }}">
+                                <span>{{ book.title }}</span>
+                                <span class="badge text-bg-primary">{{ views_count }} просмотров</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Пока нет данных о просмотрах за последние 3 месяца.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    {% if recent_books %}
+    <div class="col-lg-6">
+        <section class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h2 class="h5 mb-0">Недавно просмотренные книги</h2>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for book, last_seen in recent_books %}
+                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="{{ url_for('view_book', book_id=book.id) }}">
+                            <span>{{ book.title }}</span>
+                            <span class="small text-muted">{{ last_seen|dt }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+    {% endif %}
+</div>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+    <h1 class="h3 mb-0">Список книг</h1>
+    {% if can_add_books %}
+        <a href="{{ url_for('add_book') }}" class="btn btn-primary">Добавить книгу</a>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Название</th>
+                <th>Жанры</th>
+                <th>Год</th>
+                <th>Средняя оценка</th>
+                <th>Рецензии</th>
+                <th class="text-end">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for book in books %}
+                {% set stats = review_stats.get(book.id, {'avg': none, 'count': 0}) %}
+                <tr>
+                    <td class="fw-semibold">{{ book.title }}</td>
+                    <td>{{ book.genres_text }}</td>
+                    <td>{{ book.year }}</td>
+                    <td>
+                        {% if stats.avg is not none %}
+                            {{ stats.avg }} / 5
+                        {% else %}
+                            <span class="text-muted">нет оценок</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ stats.count }}</td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a class="btn btn-outline-primary" href="{{ url_for('view_book', book_id=book.id) }}">Просмотр</a>
+                            {% if can_edit_books %}
+                                <a class="btn btn-outline-secondary" href="{{ url_for('edit_book', book_id=book.id) }}">Редактировать</a>
+                            {% endif %}
+                            {% if can_delete_books %}
+                                <button class="btn btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteBook{{ book.id }}">
+                                    Удалить
+                                </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">Книги пока не добавлены.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% for book in books %}
+    {% if can_delete_books %}
+    <div class="modal fade" id="deleteBook{{ book.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Удаление книги</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить книгу {{ book.title }}?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                    <form method="post" action="{{ url_for('delete_book', book_id=book.id) }}">
+                        <button type="submit" class="btn btn-danger">Да</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+{% if pagination.total_pages > 1 %}
+<nav class="mt-4" aria-label="Пагинация книг">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('index', page=pagination.page - 1) }}">Назад</a>
+        </li>
+        {% for p in range(1, pagination.total_pages + 1) %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('index', page=p) }}">{{ p }}</a>
+            </li>
+        {% endfor %}
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('index', page=pagination.page + 1) }}">Вперёд</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

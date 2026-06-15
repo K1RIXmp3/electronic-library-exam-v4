@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='480' height='720' viewBox='0 0 480 720'>
+  <rect width='480' height='720' fill='hsl(155, 62%, 38%)'/>
+  <rect x='34' y='38' width='412' height='644' rx='26' fill='rgba(255,255,255,0.12)' stroke='rgba(255,255,255,0.50)' stroke-width='4'/>
+  <text x='240' y='170' text-anchor='middle' font-family='Arial, sans-serif' font-size='24' fill='rgba(255,255,255,0.85)'>Дж. Р. Р. Толкин</text>
+  <foreignObject x='58' y='225' width='364' height='230'>
+    <div xmlns='http://www.w3.org/1999/xhtml' style='font-family: Arial, sans-serif; font-size: 38px; line-height: 1.15; font-weight: 700; color: white; text-align: center; word-wrap: break-word;'>
+      Хоббит, или Туда и обратно
+    </div>
+  </foreignObject>
+  <line x1='95' y1='525' x2='385' y2='525' stroke='rgba(255,255,255,0.55)' stroke-width='3'/>
+  <text x='240' y='610' text-anchor='middle' font-family='Arial, sans-serif' font-size='30' fill='white'>1937</text>
+</svg>

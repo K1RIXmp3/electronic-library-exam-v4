@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика · Электронная библиотека{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Статистика</h1>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'log' %}active{% endif %}" href="{{ url_for('stats', tab='log') }}">Журнал действий пользователей</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'books' %}active{% endif %}" href="{{ url_for('stats', tab='books', date_from=date_from, date_to=date_to) }}">Статистика просмотра книг</a>
+    </li>
+</ul>
+
+{% if tab == 'books' %}
+<section class="card shadow-sm">
+    <div class="card-header bg-white d-flex flex-column flex-lg-row justify-content-between gap-3">
+        <form class="row g-2 align-items-end" method="get">
+            <input type="hidden" name="tab" value="books">
+            <div class="col-auto">
+                <label for="date_from" class="form-label mb-1">Дата от</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="col-auto">
+                <label for="date_to" class="form-label mb-1">Дата до</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Применить</button>
+            </div>
+        </form>
+        <div class="d-flex align-items-end">
+            <a class="btn btn-outline-success" href="{{ url_for('export_book_stats_csv', date_from=date_from, date_to=date_to) }}">Экспорт в CSV</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>№</th>
+                <th>Название книги</th>
+                <th>Количество просмотров</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in view_stats_rows %}
+                <tr>
+                    <td>{{ stats_start + loop.index }}</td>
+                    <td>{{ row.title }}</td>
+                    <td>{{ row.views_count }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted py-4">Нет данных за выбранный период.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if view_stats_pagination.total_pages > 1 %}
+    <div class="card-footer">
+        <nav aria-label="Пагинация статистики просмотров">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if not view_stats_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('stats', tab='books', stats_page=view_stats_pagination.page - 1, date_from=date_from, date_to=date_to) }}">Назад</a>
+                </li>
+                {% for p in range(1, view_stats_pagination.total_pages + 1) %}
+                    <li class="page-item {% if p == view_stats_pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('stats', tab='books', stats_page=p, date_from=date_from, date_to=date_to) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {% if not view_stats_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('stats', tab='books', stats_page=view_stats_pagination.page + 1, date_from=date_from, date_to=date_to) }}">Вперёд</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</section>
+{% else %}
+<section class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h2 class="h5 mb-0">Журнал действий пользователей</h2>
+        <a class="btn btn-outline-success" href="{{ url_for('export_log_csv') }}">Экспорт в CSV</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>№</th>
+                <th>ФИО пользователя</th>
+                <th>Название просмотренной книги</th>
+                <th>Дата и время просмотра</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for visit in log_records %}
+                <tr>
+                    <td>{{ log_start + loop.index }}</td>
+                    <td>{% if visit.user %}{{ visit.user.full_name }}{% else %}Неаутентифицированный пользователь{% endif %}</td>
+                    <td><a href="{{ url_for('view_book', book_id=visit.book.id) }}">{{ visit.book.title }}</a></td>
+                    <td>{{ visit.created_at|dt }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">Журнал пока пуст.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if log_pagination.total_pages > 1 %}
+    <div class="card-footer">
+        <nav aria-label="Пагинация журнала">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if not log_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('stats', tab='log', log_page=log_pagination.page - 1) }}">Назад</a>
+                </li>
+                {% for p in range(1, log_pagination.total_pages + 1) %}
+                    <li class="page-item {% if p == log_pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('stats', tab='log', log_page=p) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {% if not log_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('stats', tab='log', log_page=log_pagination.page + 1) }}">Вперёд</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}

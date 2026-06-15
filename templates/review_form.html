@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Новая рецензия{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+{% endblock %}
+
+{% block content %}
+{% if form_data is defined %}
+    {% set data = form_data %}
+{% else %}
+    {% set data = {} %}
+{% endif %}
+
+{% set current_rating = data.get('rating', '5') %}
+
+<div class="mb-3">
+    <h1 class="h3 mb-1">Новая рецензия</h1>
+    <div class="text-muted">Книга: {{ book.title }}</div>
+</div>
+
+<form method="post" class="card shadow-sm" novalidate>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="rating" class="form-label">Оценка</label>
+
+            <select class="form-select" id="rating" name="rating">
+                {% if current_rating == '5' %}
+                    <option value="5" selected>отлично</option>
+                {% else %}
+                    <option value="5">отлично</option>
+                {% endif %}
+
+                {% if current_rating == '4' %}
+                    <option value="4" selected>хорошо</option>
+                {% else %}
+                    <option value="4">хорошо</option>
+                {% endif %}
+
+                {% if current_rating == '3' %}
+                    <option value="3" selected>удовлетворительно</option>
+                {% else %}
+                    <option value="3">удовлетворительно</option>
+                {% endif %}
+
+                {% if current_rating == '2' %}
+                    <option value="2" selected>неудовлетворительно</option>
+                {% else %}
+                    <option value="2">неудовлетворительно</option>
+                {% endif %}
+
+                {% if current_rating == '1' %}
+                    <option value="1" selected>плохо</option>
+                {% else %}
+                    <option value="1">плохо</option>
+                {% endif %}
+
+                {% if current_rating == '0' %}
+                    <option value="0" selected>ужасно</option>
+                {% else %}
+                    <option value="0">ужасно</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="text" class="form-label">Текст рецензии</label>
+            <textarea class="form-control js-markdown" id="text" name="text" rows="8">{{ data.get('text', '') }}</textarea>
+            <div class="form-text">Можно использовать Markdown. Перед сохранением текст очищается санитайзером.</div>
+        </div>
+    </div>
+
+    <div class="card-footer d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="/books/{{ book.id }}" class="btn btn-outline-secondary">Отмена</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script>
+    const editors = [];
+
+    document.querySelectorAll('.js-markdown').forEach((element) => {
+        const editor = new EasyMDE({
+            element: element,
+            spellChecker: false,
+            status: false
+        });
+
+        editors.push(editor);
+    });
+
+    document.querySelectorAll('form').forEach((form) => {
+        form.addEventListener('submit', () => {
+            editors.forEach((editor) => {
+                editor.codemirror.save();
+            });
+        });
+    });
+</script>
+{% endblock %}

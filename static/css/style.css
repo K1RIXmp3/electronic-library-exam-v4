@@ -1,0 +1,23 @@
+.book-cover-large {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: #f1f3f5;
+}
+
+.markdown-body :first-child {
+    margin-top: 0;
+}
+
+.markdown-body :last-child {
+    margin-bottom: 0;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.card {
+    border: 0;
+}

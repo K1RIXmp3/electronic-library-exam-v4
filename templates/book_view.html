@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} · Электронная библиотека{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+    <h1 class="h3 mb-0">{{ book.title }}</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">На главную</a>
+        {% if can_edit_books %}
+            <a href="{{ url_for('edit_book', book_id=book.id) }}" class="btn btn-outline-primary">Редактировать</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4 col-lg-3">
+        <div class="card shadow-sm">
+            {% if book.cover %}
+                <img src="{{ url_for('cover_file', filename=book.cover.filename) }}" class="book-cover-large card-img-top" alt="Обложка книги {{ book.title }}">
+            {% endif %}
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt>Автор</dt>
+                    <dd>{{ book.author }}</dd>
+                    <dt>Издательство</dt>
+                    <dd>{{ book.publisher }}</dd>
+                    <dt>Год</dt>
+                    <dd>{{ book.year }}</dd>
+                    <dt>Объём</dt>
+                    <dd>{{ book.pages }} стр.</dd>
+                    <dt>Жанры</dt>
+                    <dd>{{ book.genres_text }}</dd>
+                    <dt>Средняя оценка</dt>
+                    <dd>{% if avg_rating is not none %}{{ avg_rating }} / 5{% else %}нет оценок{% endif %}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8 col-lg-9">
+        <section class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h2 class="h5 mb-0">Описание</h2>
+            </div>
+            <div class="card-body markdown-body">
+                {{ book.description|markdown|safe }}
+            </div>
+        </section>
+
+        <section class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0">Рецензии</h2>
+                {% if can_write_review %}
+                    <a href="{{ url_for('add_review', book_id=book.id) }}" class="btn btn-sm btn-primary">Написать рецензию</a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if current_user.is_authenticated and user_review %}
+                    <div class="alert alert-info">
+                        <strong>Ваша рецензия:</strong> оценка {{ user_review.rating }} / 5
+                        <div class="mt-2 markdown-body">{{ user_review.text|markdown|safe }}</div>
+                    </div>
+                {% endif %}
+
+                {% if reviews %}
+                    <div class="vstack gap-3">
+                        {% for review in reviews %}
+                            <article class="border rounded p-3 bg-white">
+                                <div class="d-flex justify-content-between gap-3 mb-2">
+                                    <strong>{{ review.user.full_name }}</strong>
+                                    <span class="badge text-bg-secondary">{{ review.rating }} / 5</span>
+                                </div>
+                                <div class="small text-muted mb-2">{{ review.created_at|dt }}</div>
+                                <div class="markdown-body">{{ review.text|markdown|safe }}</div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Пока нет рецензий.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
