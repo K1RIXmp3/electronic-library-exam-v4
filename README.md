@@ -39,9 +39,9 @@
 Для проверки можно использовать такие аккаунты:
 
 ```text
-admin / admin
-moderator / moderator
-user / user
+admin / 123
+moderator / 123
+user / 123
 ```
 
 ## Запуск проекта
